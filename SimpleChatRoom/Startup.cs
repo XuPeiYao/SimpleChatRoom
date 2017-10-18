@@ -35,8 +35,9 @@ namespace SimpleChatRoom
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseStaticFiles();
             app.UseDefaultFiles();
+            app.UseStaticFiles();
+            
             app.UseWebSockets<ChatRoomHandler>();
             app.UseMvc();
         }
