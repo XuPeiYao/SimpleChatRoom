@@ -1,5 +1,9 @@
 import { Component, OnInit, AfterViewChecked } from '@angular/core';
 import { ChatroomSocketService } from './chatroom-socket.service';
+import { Subject } from 'rxjs/Subject';
+import 'rxjs/add/operator/switchMap';
+import { Observable } from 'rxjs/Observable';
+import 'rxjs/Rx';
 
 @Component({
   selector: 'app-root',
@@ -11,8 +15,15 @@ export class AppComponent implements OnInit, AfterViewChecked {
   socket: WebSocket;
   messageViewer: Element;
   inputText: string;
+  scrollToSource: Subject<number>;
   constructor(private socketService: ChatroomSocketService) {
-
+    this.scrollToSource = new Subject<number>();
+    this.scrollToSource.switchMap(targetYPos => {
+      return Observable.interval(5)
+          .scan((acc, curr) =>  acc + 5, this.messageViewer.scrollTop)
+          .do(position => this.messageViewer.scrollTo(0, position))
+          .takeWhile(val => val < targetYPos);
+    }).subscribe();
   }
 
   public sendMessage(message: string) {
@@ -28,7 +39,7 @@ export class AppComponent implements OnInit, AfterViewChecked {
   }
 
   ngAfterViewChecked(): void {
-    this.messageViewer.scrollTop = this.messageViewer.scrollHeight * 2;
+    this.scrollToSource.next(this.messageViewer.clientHeight);
   }
 
   ngOnInit(): void {

@@ -49,6 +49,14 @@ module.exports = "<div id=\"messageViewer\" class=\"messageList\">\n  <app-messa
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chatroom_socket_service__ = __webpack_require__("../../../../../src/app/chatroom-socket.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Subject__ = __webpack_require__("../../../../rxjs/Subject.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_Subject___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_Subject__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_switchMap__ = __webpack_require__("../../../../rxjs/add/operator/switchMap.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_switchMap___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_add_operator_switchMap__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_Observable__ = __webpack_require__("../../../../rxjs/Observable.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_rxjs_Observable__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_rxjs_Rx__ = __webpack_require__("../../../../rxjs/Rx.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_rxjs_Rx___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_rxjs_Rx__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -60,10 +68,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 
 
+
+
+
+
 var AppComponent = (function () {
     function AppComponent(socketService) {
+        var _this = this;
         this.socketService = socketService;
         this.messages = [];
+        this.scrollToSource = new __WEBPACK_IMPORTED_MODULE_2_rxjs_Subject__["Subject"]();
+        this.scrollToSource.switchMap(function (targetYPos) {
+            return __WEBPACK_IMPORTED_MODULE_4_rxjs_Observable__["Observable"].interval(5)
+                .scan(function (acc, curr) { return acc + 5; }, _this.messageViewer.scrollTop)
+                .do(function (position) { return _this.messageViewer.scrollTo(0, position); })
+                .takeWhile(function (val) { return val < targetYPos; });
+        }).subscribe();
     }
     AppComponent.prototype.sendMessage = function (message) {
         if (message.trim().length === 0) {
@@ -77,7 +97,7 @@ var AppComponent = (function () {
         this.inputText = '';
     };
     AppComponent.prototype.ngAfterViewChecked = function () {
-        this.messageViewer.scrollTop = this.messageViewer.scrollHeight * 2;
+        this.scrollToSource.next(this.messageViewer.clientHeight);
     };
     AppComponent.prototype.ngOnInit = function () {
         this.socket = this.socketService.getSocket();
