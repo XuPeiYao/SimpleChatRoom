@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using EzCoreKit.AspNetCore.WebSockets;
 
 namespace SimpleChatRoom
 {
@@ -34,6 +35,9 @@ namespace SimpleChatRoom
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+            app.UseDefaultFiles();
+            app.UseWebSockets<ChatRoomHandler>();
             app.UseMvc();
         }
     }
