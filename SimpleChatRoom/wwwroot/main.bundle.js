@@ -25,7 +25,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "", ""]);
+exports.push([module.i, ".messageList {\r\n  height: calc( 100% - 30px );\r\n  overflow-y: scroll;\r\n}\r\n", ""]);
 
 // exports
 
@@ -38,7 +38,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div style=\"text-align:center\">\n  <h1>\n    Welcome to {{title}}!\n  </h1>\n  <img width=\"300\" src=\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==\">\n</div>\n<h2>Here are some links to help you start: </h2>\n<ul>\n  <li>\n    <h2><a target=\"_blank\" rel=\"noopener\" href=\"https://angular.io/tutorial\">Tour of Heroes</a></h2>\n  </li>\n  <li>\n    <h2><a target=\"_blank\" rel=\"noopener\" href=\"https://github.com/angular/angular-cli/wiki\">CLI Documentation</a></h2>\n  </li>\n  <li>\n    <h2><a target=\"_blank\" rel=\"noopener\" href=\"https://blog.angular.io/\">Angular blog</a></h2>\n  </li>\n</ul>\n\n"
+module.exports = "<div id=\"messageViewer\" class=\"messageList\">\n  <app-message-box *ngFor=\"let message of messages\" [isSelf]=\"message.isSelf\" [message]=\"message.message\"></app-message-box>\n</div>\n<app-message-inputer [(text)]=\"inputText\" (onSend)=\"sendMessage($event)\"></app-message-inputer>\n"
 
 /***/ }),
 
@@ -48,17 +48,48 @@ module.exports = "<!--The content below is only a placeholder and can be replace
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__chatroom_socket_service__ = __webpack_require__("../../../../../src/app/chatroom-socket.service.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
 
 var AppComponent = (function () {
-    function AppComponent() {
-        this.title = 'app';
+    function AppComponent(socketService) {
+        this.socketService = socketService;
+        this.messages = [];
     }
+    AppComponent.prototype.sendMessage = function (message) {
+        if (message.trim().length === 0) {
+            return;
+        }
+        this.socket.send(message);
+        this.messages.push({
+            message: message,
+            isSelf: true
+        });
+        this.inputText = '';
+    };
+    AppComponent.prototype.ngAfterViewChecked = function () {
+        this.messageViewer.scrollTop = this.messageViewer.scrollHeight * 2;
+    };
+    AppComponent.prototype.ngOnInit = function () {
+        this.socket = this.socketService.getSocket();
+        this.messageViewer = document.getElementById('messageViewer');
+        var THIS = this;
+        this.socket.addEventListener('message', function (event) {
+            THIS.messages.push({
+                message: event.data,
+                isSelf: false
+            });
+        });
+    };
     return AppComponent;
 }());
 AppComponent = __decorate([
@@ -66,9 +97,11 @@ AppComponent = __decorate([
         selector: 'app-root',
         template: __webpack_require__("../../../../../src/app/app.component.html"),
         styles: [__webpack_require__("../../../../../src/app/app.component.css")]
-    })
+    }),
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__chatroom_socket_service__["a" /* ChatroomSocketService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__chatroom_socket_service__["a" /* ChatroomSocketService */]) === "function" && _a || Object])
 ], AppComponent);
 
+var _a;
 //# sourceMappingURL=app.component.js.map
 
 /***/ }),
@@ -80,13 +113,21 @@ AppComponent = __decorate([
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__ = __webpack_require__("../../../platform-browser/@angular/platform-browser.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__app_component__ = __webpack_require__("../../../../../src/app/app.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_forms__ = __webpack_require__("../../../forms/@angular/forms.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__app_component__ = __webpack_require__("../../../../../src/app/app.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__message_box_message_box_component__ = __webpack_require__("../../../../../src/app/message-box/message-box.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__chatroom_socket_service__ = __webpack_require__("../../../../../src/app/chatroom-socket.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__message_inputer_message_inputer_component__ = __webpack_require__("../../../../../src/app/message-inputer/message-inputer.component.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
+
+
+
 
 
 
@@ -98,17 +139,218 @@ var AppModule = (function () {
 AppModule = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["L" /* NgModule */])({
         declarations: [
-            __WEBPACK_IMPORTED_MODULE_2__app_component__["a" /* AppComponent */]
+            __WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */],
+            __WEBPACK_IMPORTED_MODULE_4__message_box_message_box_component__["a" /* MessageBoxComponent */],
+            __WEBPACK_IMPORTED_MODULE_6__message_inputer_message_inputer_component__["a" /* MessageInputerComponent */]
         ],
         imports: [
-            __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */]
+            __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
+            __WEBPACK_IMPORTED_MODULE_2__angular_forms__["a" /* FormsModule */]
         ],
-        providers: [],
-        bootstrap: [__WEBPACK_IMPORTED_MODULE_2__app_component__["a" /* AppComponent */]]
+        providers: [__WEBPACK_IMPORTED_MODULE_5__chatroom_socket_service__["a" /* ChatroomSocketService */]],
+        bootstrap: [__WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */]]
     })
 ], AppModule);
 
 //# sourceMappingURL=app.module.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/chatroom-socket.service.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ChatroomSocketService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var ChatroomSocketService = (function () {
+    function ChatroomSocketService() {
+    }
+    ChatroomSocketService.prototype.getSocket = function () {
+        return new WebSocket("ws://localhost:54395/chatroom");
+        // return new WebSocket(`ws://${location.host}/chatroom`);
+    };
+    return ChatroomSocketService;
+}());
+ChatroomSocketService = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["B" /* Injectable */])(),
+    __metadata("design:paramtypes", [])
+], ChatroomSocketService);
+
+//# sourceMappingURL=chatroom-socket.service.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/message-box/message-box.component.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "/**\r\n * https://www.minwt.com/webdesign-dev/css/8996.html\r\n */\r\n.mwt_border{\r\n  text-align: left !important;\r\n\twidth: calc( 100% - 80px );\r\n\tmin-height:90px;\r\n\ttext-align:center;\r\n\tbackground:#fff;\r\n\tposition:relative;\r\n\tborder: solid 1px #333;\r\n\tmargin:30px;\r\n  padding:5px;\r\n  border-radius: 10px;\r\n}\r\n/*箭頭右*/\r\n.mwt_border .arrow_r_int{\r\n\twidth:0px;\r\n\theight:0px;\r\n\tborder-width:15px;\r\n\tborder-style:solid;\r\n\tborder-color:transparent transparent transparent #333;\r\n\tposition:absolute;\r\n\ttop:15px;\r\n\tright:-30px;\r\n}\r\n/*箭頭右-邊框*/\r\n.mwt_border .arrow_r_out{\r\n\twidth:0px;\r\n\theight:0px;\r\n\tborder-width:15px;\r\n\tborder-style:solid;\r\n\tborder-color:transparent transparent transparent #fff;\r\n\tposition:absolute;\r\n\ttop:15px;\r\n\tright:-29px;\r\n}\r\n\r\n/*箭頭左*/\r\n.mwt_border .arrow_l_int{\r\n\twidth:0px;\r\n\theight:0px;\r\n\tborder-width:15px;\r\n\tborder-style:solid;\r\n\tborder-color:transparent #333 transparent  transparent ;\r\n\tposition:absolute;\r\n\ttop:15px;\r\n  left:-30px;\r\n}\r\n/*箭頭左-邊框*/\r\n.mwt_border .arrow_l_out{\r\n\twidth:0px;\r\n\theight:0px;\r\n\tborder-width:15px;\r\n\tborder-style:solid;\r\n\tborder-color:transparent #fff transparent transparent ;\r\n\tposition:absolute;\r\n\ttop:15px;\r\n  left:-29px;\r\n}\r\n", ""]);
+
+// exports
+
+
+/*** EXPORTS FROM exports-loader ***/
+module.exports = module.exports.toString();
+
+/***/ }),
+
+/***/ "../../../../../src/app/message-box/message-box.component.html":
+/***/ (function(module, exports) {
+
+module.exports = "<div class=\"mwt_border\">\n    <span class=\"arrow_l_int arrow_r_int\" [class.arrow_l_int]=\"!isSelf\"></span>\n    <span class=\"arrow_l_out arrow_r_out\" [class.arrow_l_out]=\"!isSelf\"></span>\n    {{message}}\n</div>\n"
+
+/***/ }),
+
+/***/ "../../../../../src/app/message-box/message-box.component.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MessageBoxComponent; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var MessageBoxComponent = (function () {
+    function MessageBoxComponent() {
+        /**
+         * 是否為目前使用者自身送出的訊息，如果是則對話框箭頭在右
+         */
+        this.isSelf = true;
+    }
+    MessageBoxComponent.prototype.ngOnInit = function () {
+    };
+    return MessageBoxComponent;
+}());
+__decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["E" /* Input */])(),
+    __metadata("design:type", Object)
+], MessageBoxComponent.prototype, "isSelf", void 0);
+__decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["E" /* Input */])(),
+    __metadata("design:type", String)
+], MessageBoxComponent.prototype, "message", void 0);
+MessageBoxComponent = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["n" /* Component */])({
+        selector: 'app-message-box',
+        template: __webpack_require__("../../../../../src/app/message-box/message-box.component.html"),
+        styles: [__webpack_require__("../../../../../src/app/message-box/message-box.component.css")]
+    }),
+    __metadata("design:paramtypes", [])
+], MessageBoxComponent);
+
+//# sourceMappingURL=message-box.component.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/message-inputer/message-inputer.component.css":
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, ".inputer {\r\n  margin: 0;\r\n  height: 30px;\r\n  background-color: gray;\r\n}\r\n\r\n.inputer > input {\r\n  margin-top: 1px;\r\n  height: calc(30px - 3px);\r\n  border: 1px;\r\n  width: calc(100% - 62px);\r\n}\r\n\r\n.inputer > button {\r\n  width: 60px;\r\n  height: 100%;\r\n  border: 1px;\r\n  float: right;\r\n}\r\n", ""]);
+
+// exports
+
+
+/*** EXPORTS FROM exports-loader ***/
+module.exports = module.exports.toString();
+
+/***/ }),
+
+/***/ "../../../../../src/app/message-inputer/message-inputer.component.html":
+/***/ (function(module, exports) {
+
+module.exports = "<div class=\"inputer\">\n  <input [(ngModel)]=\"text\"  (keyup.enter)=\"enter()\" />\n  <button (click)=\"enter()\">送出</button>\n</div>\n"
+
+/***/ }),
+
+/***/ "../../../../../src/app/message-inputer/message-inputer.component.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return MessageInputerComponent; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+var MessageInputerComponent = (function () {
+    function MessageInputerComponent() {
+        this.textChange = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["w" /* EventEmitter */]();
+        this.onSend = new __WEBPACK_IMPORTED_MODULE_0__angular_core__["w" /* EventEmitter */]();
+    }
+    Object.defineProperty(MessageInputerComponent.prototype, "text", {
+        get: function () {
+            return this._text;
+        },
+        set: function (str) {
+            this._text = str;
+            this.textChange.emit(str);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    MessageInputerComponent.prototype.ngOnInit = function () {
+    };
+    MessageInputerComponent.prototype.enter = function () {
+        this.onSend.emit(this.text);
+    };
+    return MessageInputerComponent;
+}());
+__decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["E" /* Input */])(),
+    __metadata("design:type", String),
+    __metadata("design:paramtypes", [String])
+], MessageInputerComponent.prototype, "text", null);
+__decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["R" /* Output */])(),
+    __metadata("design:type", typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_0__angular_core__["w" /* EventEmitter */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_0__angular_core__["w" /* EventEmitter */]) === "function" && _a || Object)
+], MessageInputerComponent.prototype, "textChange", void 0);
+__decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["R" /* Output */])(),
+    __metadata("design:type", Object)
+], MessageInputerComponent.prototype, "onSend", void 0);
+MessageInputerComponent = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["n" /* Component */])({
+        selector: 'app-message-inputer',
+        template: __webpack_require__("../../../../../src/app/message-inputer/message-inputer.component.html"),
+        styles: [__webpack_require__("../../../../../src/app/message-inputer/message-inputer.component.css")]
+    }),
+    __metadata("design:paramtypes", [])
+], MessageInputerComponent);
+
+var _a;
+//# sourceMappingURL=message-inputer.component.js.map
 
 /***/ }),
 
@@ -143,7 +385,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
 
 if (__WEBPACK_IMPORTED_MODULE_3__environments_environment__["a" /* environment */].production) {
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_19" /* enableProdMode */])();
+    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_20" /* enableProdMode */])();
 }
 Object(__WEBPACK_IMPORTED_MODULE_1__angular_platform_browser_dynamic__["a" /* platformBrowserDynamic */])().bootstrapModule(__WEBPACK_IMPORTED_MODULE_2__app_app_module__["a" /* AppModule */])
     .catch(function (err) { return console.log(err); });

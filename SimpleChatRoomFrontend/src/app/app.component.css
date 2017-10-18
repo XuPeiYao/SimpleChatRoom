@@ -1,0 +1,4 @@
+.messageList {
+  height: calc( 100% - 30px );
+  overflow-y: scroll;
+}

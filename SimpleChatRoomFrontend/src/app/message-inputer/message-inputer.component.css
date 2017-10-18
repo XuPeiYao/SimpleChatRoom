@@ -1,0 +1,19 @@
+.inputer {
+  margin: 0;
+  height: 30px;
+  background-color: gray;
+}
+
+.inputer > input {
+  margin-top: 1px;
+  height: calc(30px - 3px);
+  border: 1px;
+  width: calc(100% - 62px);
+}
+
+.inputer > button {
+  width: 60px;
+  height: 100%;
+  border: 1px;
+  float: right;
+}
