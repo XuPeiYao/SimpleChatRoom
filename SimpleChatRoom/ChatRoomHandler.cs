@@ -34,9 +34,9 @@ namespace SimpleChatRoom
 
         private void ChatRoomHandler_OnReceived(System.Net.WebSockets.WebSocket socket, System.Net.WebSockets.WebSocketMessageType messageType, byte[] receiveMessage)
         {
+            if (receiveMessage.Length == 0) return;
             var recInstance = webSocketInstances.Where(x => x.Value == socket).First();
-
-
+            
             Parallel.ForEach(webSocketInstances.Values.Where(x => x != socket),x => {
                 //未確認訊息情況下直接廣播
                 x.SendTextAsync(recInstance.Key + ": " + Encoding.UTF8.GetString(receiveMessage)).GetAwaiter().GetResult();
